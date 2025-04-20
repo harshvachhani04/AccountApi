@@ -1,6 +1,8 @@
 using AccountApi.Data;
+using AccountApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"))
 );
+builder.Services.AddSingleton<JWTTokenGenerator>();
+builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Warning()
+    .WriteTo.File("Logs/AccountAPI_.log")
+    .CreateLogger();
 
 var jwtSetting = builder.Configuration.GetSection("JWTSettings");
 
